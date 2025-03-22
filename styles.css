@@ -1,0 +1,51 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f9f9f9;
+}
+
+.header {
+    margin-top: 50px;
+}
+
+.logo {
+    background-color: #5a2d82;
+    color: white;
+    display: inline-block;
+    padding: 10px;
+    font-size: 24px;
+    border-radius: 5px;
+}
+
+h1 {
+    font-size: 36px;
+    margin: 10px 0;
+}
+
+p {
+    font-size: 18px;
+    color: #666;
+}
+
+.countries {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.country {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 10px;
+    width: 150px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.country:hover {
+    transform: scale(1.05);
+}
