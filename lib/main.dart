@@ -44,12 +44,73 @@ class CountryButton extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => BrazilScreen()),
                 );
+              } else if (countryName == 'México') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MexicoScreen()),
+                );
               }
             },
             child: Text(countryName),
           ),
         ],
       ),
+    );
+  }
+}
+
+class MexicoScreen extends StatefulWidget {
+  @override
+  _MexicoScreenState createState() => _MexicoScreenState();
+}
+
+class _MexicoScreenState extends State<MexicoScreen> {
+  Map<String, dynamic> exchangeRate = {};
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchExchangeRate();
+  }
+
+  Future<void> fetchExchangeRate() async {
+    final response = await http.get(Uri.parse('https://mx.dolarapi.com/v1/cotizaciones/usd'));
+    if (response.statusCode == 200) {
+      setState(() {
+        exchangeRate = json.decode(response.body);
+        isLoading = false;
+      });
+    } else {
+      throw Exception('Failed to load exchange rate');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cotizaciones de México'),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Card(
+              margin: EdgeInsets.all(16.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(exchangeRate['nombre'], style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 10),
+                    Text('Compra: \$${exchangeRate['compra']}'),
+                    Text('Venta: \$${exchangeRate['venta']}'),
+                    Text('Fix: \$${exchangeRate['fix']}'),
+                    Text('Actualizado: ${exchangeRate['fechaActualizacion']}'),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 }
