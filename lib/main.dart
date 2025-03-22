@@ -102,7 +102,7 @@ class _BrazilScreenState extends State<BrazilScreen> {
                       children: [
                         Text('Compra: \$${rate['compra']}'),
                         Text('Venta: \$${rate['venda']}'),
-                        Text('Actualizado: ${rate['dataHoraCotacao']}'),
+                        Text('Actualizado: ${rate['dataAtualizacao']}'),
                       ],
                     ),
                   ),
