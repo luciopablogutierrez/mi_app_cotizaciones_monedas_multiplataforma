@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // Import the flutter_svg package
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -18,14 +20,208 @@ class CountryButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.string(flagSvg, width: 30, height: 20), // Use SvgPicture.string to render the SVG
+          SvgPicture.string(flagSvg, width: 30, height: 20),
           SizedBox(width: 10),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              if (countryName == 'Argentina') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ArgentinaScreen()),
+                );
+              } else if (countryName == 'Chile') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChileScreen()),
+                );
+              } else if (countryName == 'Venezuela') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => VenezuelaScreen()),
+                );
+              }
+            },
             child: Text(countryName),
           ),
         ],
       ),
+    );
+  }
+}
+
+class VenezuelaScreen extends StatefulWidget {
+  @override
+  _VenezuelaScreenState createState() => _VenezuelaScreenState();
+}
+
+class _VenezuelaScreenState extends State<VenezuelaScreen> {
+  List<dynamic> exchangeRates = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchExchangeRates();
+  }
+
+  Future<void> fetchExchangeRates() async {
+    final response = await http.get(Uri.parse('https://ve.dolarapi.com/v1/dolares'));
+    if (response.statusCode == 200) {
+      setState(() {
+        exchangeRates = json.decode(response.body);
+        isLoading = false;
+      });
+    } else {
+      throw Exception('Failed to load exchange rates');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cotizaciones de Venezuela'),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: exchangeRates.length,
+              itemBuilder: (context, index) {
+                final rate = exchangeRates[index];
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(rate['nombre']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Compra: \$${rate['compra']}'),
+                        Text('Venta: \$${rate['venta']}'),
+                        Text('Actualizado: ${rate['fechaActualizacion']}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+class ChileScreen extends StatefulWidget {
+  @override
+  _ChileScreenState createState() => _ChileScreenState();
+}
+
+class _ChileScreenState extends State<ChileScreen> {
+  List<dynamic> exchangeRates = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchExchangeRates();
+  }
+
+  Future<void> fetchExchangeRates() async {
+    final response = await http.get(Uri.parse('https://cl.dolarapi.com/v1/cotizaciones'));
+    if (response.statusCode == 200) {
+      setState(() {
+        exchangeRates = json.decode(response.body);
+        isLoading = false;
+      });
+    } else {
+      throw Exception('Failed to load exchange rates');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cotizaciones de Chile'),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: exchangeRates.length,
+              itemBuilder: (context, index) {
+                final rate = exchangeRates[index];
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(rate['nombre']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Compra: \$${rate['compra']}'),
+                        Text('Venta: \$${rate['venta']}'),
+                        Text('Actualizado: ${rate['fechaActualizacion']}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+class ArgentinaScreen extends StatefulWidget {
+  @override
+  _ArgentinaScreenState createState() => _ArgentinaScreenState();
+}
+
+class _ArgentinaScreenState extends State<ArgentinaScreen> {
+  List<dynamic> exchangeRates = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchExchangeRates();
+  }
+
+  Future<void> fetchExchangeRates() async {
+    final response = await http.get(Uri.parse('https://dolarapi.com/v1/dolares'));
+    if (response.statusCode == 200) {
+      setState(() {
+        exchangeRates = json.decode(response.body);
+        isLoading = false;
+      });
+    } else {
+      throw Exception('Failed to load exchange rates');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cotizaciones de Argentina'),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: exchangeRates.length,
+              itemBuilder: (context, index) {
+                final rate = exchangeRates[index];
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(rate['nombre']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Compra: \$${rate['compra']}'),
+                        Text('Venta: \$${rate['venta']}'),
+                        Text('Actualizado: ${rate['fechaActualizacion']}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
@@ -48,7 +244,7 @@ class MyApp extends StatelessWidget {
 <svg class="size-10 sm:size-12" enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><circle cx="256" cy="256" fill="#f0f0f0" r="256"></circle><path d="m512 256c0-101.494-59.065-189.19-144.696-230.598v461.195c85.631-41.407 144.696-129.103 144.696-230.597z" fill="#d80027"></path><g fill="#6da544"><path d="m0 256c0 101.494 59.065 189.19 144.696 230.598v-461.196c-85.631 41.408-144.696 129.104-144.696 230.598z"></path><path d="m189.217 256c0 36.883 29.9 66.783 66.783 66.783s66.783-29.9 66.783-66.783v-22.261h-133.566z"></path></g><path d="m345.043 211.478h-66.783c0-12.294-9.967-22.261-22.261-22.261s-22.261 9.967-22.261 22.261h-66.783c0 12.295 10.709 22.261 23.002 22.261h-.741c0 12.295 9.966 22.261 22.261 22.261 0 12.295 9.966 22.261 22.261 22.261h44.522c12.295 0 22.261-9.966 22.261-22.261 12.295 0 22.261-9.966 22.261-22.261h-.742c12.295 0 23.003-9.966 23.003-22.261z" fill="#ff9811"></path></svg>
 ''',
     'Uruguay': '''
-<svg class="size-10 sm:size-12" enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><circle cx="256" cy="256" fill="#f0f0f0" r="256"></circle><path id="SVGCleanerId_0" d="m256 189.217h247.181c-6.419-23.814-16.175-46.255-28.755-66.783h-218.426z" fill="#338af3"></path><g fill="#338af3"><path d="m96.643 456.348h318.713c23.363-18.608 43.399-41.21 59.069-66.783h-436.851c15.671 25.572 35.707 48.175 59.069 66.783z"></path><path d="m256 0v55.652h159.357c-43.73-34.828-99.108-55.652-159.357-55.652z"></path></g><g><path id="SVGCleanerId_0_1_" d="m256 189.217h247.181c-6.419-23.814-16.175-46.255-28.755-66.783h-218.426z" fill="#338af3"></path></g><path d="m0 256c0 23.107 3.08 45.489 8.819 66.783h494.363c5.738-21.294 8.818-43.676 8.818-66.783z" fill="#338af3"></path><path d="m222.609 149.821-31.266 14.707 16.649 30.28-33.95-6.494-4.302 34.295-23.646-25.224-23.648 25.224-4.301-34.295-33.95 6.492 16.648-30.279-31.264-14.706 31.265-14.705-16.649-30.28 33.949 6.494 4.303-34.295 23.647 25.224 23.647-25.224 4.301 34.295 33.951-6.494-16.649 30.281z" fill="#ffda44"></path></svg>
+<svg class="size-10 sm:size-12" enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><circle cx="256" cy="256" fill="#f0f0f0" r="256"></circle><path id="SVGCleanerId_0" d="m256 189.217h247.181c-6.419-23.814-16.175-46.255-28.755-66.783h-218.426z" fill="#338af3"></path><g fill="#338af3"><path d="m96.643 456.348h318.713c23.363-18.608 43.399-41.21 59.069-66.783h-436.851c15.671 25.572 35.707 48.175 59.069 66.783z"></path><path d="m256 0v55.652h159.357c-43.73-34.828-99.108-55.652-159.357-55.652z"></path></g><g><path id="SVGCleanerId_0_1_" d="m256 189.217h247.181c-6.419-23.814-16.175-46.255-28.755-66.783h-218.426z" fill="#338af3"></path></g><path d="m0 256c0 23.107 3.08 45.489 8.819 66.783h494.363c5.738-21.294 8.818-43.676 8.818-66.783z" fill="#338af3"></path><path d="m222.609 149.821-31.266 14.707 16.649 30.28-33.95-6.494-4.302 34.295-23.646-25.224-23.648 25.224-4.301-34.295-33.95 6.492 16.648-30.279-31.264-14.706 31.265-14.705-16.649-30.28 33.949 6.494 4.303-34.295 23.647 25.224 23.648-25.224 4.301 34.295 33.951-6.494-16.649 30.281z" fill="#ffda44"></path></svg>
 ''',
   };
 
@@ -58,7 +254,7 @@ class MyApp extends StatelessWidget {
       title: 'Mi App de Cotizaciones',
       home: Scaffold(
         appBar: AppBar(
-          title: Text('MiAppCotizaciones.com'),
+          title: Text('By PINCEN.IO'),
         ),
         body: Center(
           child: Column(
