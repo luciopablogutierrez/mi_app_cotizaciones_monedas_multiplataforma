@@ -39,12 +39,76 @@ class CountryButton extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => VenezuelaScreen()),
                 );
+              } else if (countryName == 'Brasil') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BrazilScreen()),
+                );
               }
             },
             child: Text(countryName),
           ),
         ],
       ),
+    );
+  }
+}
+
+class BrazilScreen extends StatefulWidget {
+  @override
+  _BrazilScreenState createState() => _BrazilScreenState();
+}
+
+class _BrazilScreenState extends State<BrazilScreen> {
+  List<dynamic> exchangeRates = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchExchangeRates();
+  }
+
+  Future<void> fetchExchangeRates() async {
+    final response = await http.get(Uri.parse('https://br.dolarapi.com/v1/cotacoes'));
+    if (response.statusCode == 200) {
+      setState(() {
+        exchangeRates = json.decode(response.body);
+        isLoading = false;
+      });
+    } else {
+      throw Exception('Failed to load exchange rates');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cotizaciones de Brasil'),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: exchangeRates.length,
+              itemBuilder: (context, index) {
+                final rate = exchangeRates[index];
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(rate['nome']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Compra: \$${rate['compra']}'),
+                        Text('Venta: \$${rate['venda']}'),
+                        Text('Actualizado: ${rate['dataHoraCotacao']}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
