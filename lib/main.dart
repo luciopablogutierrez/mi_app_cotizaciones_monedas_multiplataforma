@@ -49,12 +49,76 @@ class CountryButton extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => MexicoScreen()),
                 );
+              } else if (countryName == 'Uruguay') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UruguayScreen()),
+                );
               }
             },
             child: Text(countryName),
           ),
         ],
       ),
+    );
+  }
+}
+
+class UruguayScreen extends StatefulWidget {
+  @override
+  _UruguayScreenState createState() => _UruguayScreenState();
+}
+
+class _UruguayScreenState extends State<UruguayScreen> {
+  List<dynamic> exchangeRates = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchExchangeRates();
+  }
+
+  Future<void> fetchExchangeRates() async {
+    final response = await http.get(Uri.parse('https://uy.dolarapi.com/v1/cotizaciones'));
+    if (response.statusCode == 200) {
+      setState(() {
+        exchangeRates = json.decode(response.body);
+        isLoading = false;
+      });
+    } else {
+      throw Exception('Failed to load exchange rates');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cotizaciones de Uruguay'),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: exchangeRates.length,
+              itemBuilder: (context, index) {
+                final rate = exchangeRates[index];
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(rate['nombre']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Compra: \$${rate['compra'] ?? 'N/A'}'),
+                        Text('Venta: \$${rate['venta'] ?? 'N/A'}'),
+                        Text('Actualizado: ${rate['fechaActualizacion']}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
