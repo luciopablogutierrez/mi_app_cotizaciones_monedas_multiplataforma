@@ -54,12 +54,81 @@ class CountryButton extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => UruguayScreen()),
                 );
+              } else if (countryName == 'Bolivia') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BoliviaScreen()),
+                );
               }
             },
             child: Text(countryName),
           ),
         ],
       ),
+    );
+  }
+}
+
+class BoliviaScreen extends StatefulWidget {
+  @override
+  _BoliviaScreenState createState() => _BoliviaScreenState();
+}
+
+class _BoliviaScreenState extends State<BoliviaScreen> {
+  List<dynamic> exchangeRates = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchExchangeRates();
+  }
+
+  Future<void> fetchExchangeRates() async {
+    final officialResponse = await http.get(Uri.parse('https://bo.dolarapi.com/v1/dolares/oficial'));
+    final binanceResponse = await http.get(Uri.parse('https://bo.dolarapi.com/v1/dolares/binance'));
+
+    if (officialResponse.statusCode == 200 && binanceResponse.statusCode == 200) {
+      setState(() {
+        exchangeRates = [
+          json.decode(officialResponse.body),
+          json.decode(binanceResponse.body)
+        ];
+        isLoading = false;
+      });
+    } else {
+      throw Exception('Failed to load exchange rates');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cotizaciones de Bolivia'),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: exchangeRates.length,
+              itemBuilder: (context, index) {
+                final rate = exchangeRates[index];
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(rate['nombre']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Compra: \$${rate['compra'] ?? 'N/A'}'),
+                        Text('Venta: \$${rate['venta'] ?? 'N/A'}'),
+                        Text('Actualizado: ${rate['fechaActualizacion']}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
